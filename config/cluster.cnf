@@ -1,0 +1,47 @@
+{% set ipaddress = [] %} 
+{% set hosts = salt['mine.get']('roles:db', 'network.ip_addrs', 'grain') %}
+{%- for id, ips in hosts.iteritems() %} 
+  {% do ipaddress.append(ips[0]) %} 
+{% endfor %} 
+
+{% set hosts = salt['mine.get']('roles:db_bootstrap', 'network.ip_addrs', 'grain') %}
+{%- for id, ips in hosts.iteritems() %} 
+  {% do ipaddress.append(ips[0]) %}
+{% endfor %}
+
+{% set ipaddress = ",".join(ipaddress) %}
+[mysqld]
+
+#innodb_buffer_pool_size=200M
+#innodb_log_file_size=100M
+innodb_flush_log_at_trx_commit=0
+max_connections=1024
+innodb_file_per_table
+server_id={{ grains['server_id'] }}
+
+performance_schema=0
+
+binlog_format=ROW
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+query_cache_type=0
+query_cache_size=0
+bind-address=0.0.0.0
+
+
+# Galera Provider Configuration 
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+#wsrep_provider_options="gchache.size=32G" 
+
+#Galera Cluster Configuration
+wsrep_cluster_name="RPC_MariaDB"
+wsrep_cluster_address="gcomm://{{ ipaddress }}"
+
+# Galera Synchronization Configuration 
+#Change sst method to xtrabackup.
+wsrep_sst_method=rsync
+#wsrep_sst_auth=user:pass
+
+# Galera Node Configuration
+wsrep_node_address="{{ salt['mine.get'](grains['id'], 'network.ip_addrs').values()[0][0] }}"
+wsrep_node_name="{{ grains['fqdn'] }}"
