@@ -1,0 +1,3 @@
+Package: *
+Pin: origin {{ pillar['mdb_repo']['baseurl'] }}
+Pin-Priority: 1000
