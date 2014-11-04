@@ -26,12 +26,17 @@ default-storage-engine=innodb
 query_cache_type=0
 query_cache_size=0
 bind-address=0.0.0.0
-max_connections=1024
+#Max connections is set to 100 * The number of CPUS the VM has
+max_connections= {{ grains['num_cpus'] * 100 }}
 
 
 # Galera Provider Configuration 
 wsrep_provider=/usr/lib/galera/libgalera_smm.so
-#wsrep_provider_options="gchache.size=32G" 
+{% if grains['mem_total'] <= 2000 %}
+wsrep_provider_options="gcache.size=200M" 
+{% else %}
+wsrep_provider_options="gcache.size=1G"
+{% endif %}
 
 #Galera Cluster Configuration
 wsrep_cluster_name="RPC_MariaDB"
