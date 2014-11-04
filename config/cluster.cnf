@@ -11,11 +11,12 @@
 
 #####InnoDB Settings######
 #Set to 70% of the total memory. Per documentation: http://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_buffer_pool_size
-innodb_buffer_pool_size= {{ (grains['mem_total'] * 0.70)|int }}
-#innodb_log_file_size=100M
-innodb_flush_log_at_trx_commit=0
-innodb_file_per_table
+innodb_buffer_pool_size= {{ (grains['mem_total'] * 0.70)|int }}M
+innodb_log_file_size=128M
+innodb_flush_log_at_trx_commit=1
+innodb_file_per_table=1
 innodb_autoinc_lock_mode=2
+innodb_flush_method=O_DIRECT
 
 
 performance_schema=0
@@ -37,9 +38,11 @@ wsrep_cluster_name="RPC_MariaDB"
 wsrep_cluster_address="gcomm://{{ ipaddress }}"
 
 # Galera Synchronization Configuration 
-#Change sst method to xtrabackup.
 wsrep_sst_method=xtrabackup
 wsrep_sst_auth=root:{{ pillar['mysql_config']['admin_password'] }}
+
+#The number of slave threads has been optimized to be the number of cpus.
+wsrep_slave_threads={{ grains['num_cpus'] }}
 
 # Galera Node Configuration
 wsrep_node_address="{{ salt['mine.get'](grains['id'], 'network.ip_addrs').values()[0][0] }}"
