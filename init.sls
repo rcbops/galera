@@ -194,7 +194,7 @@ mysql_stop:
 {% if grains['roles'][0] == 'db_bootstrap' %}
 start_wsrep:
   cmd.run:
-    - name: "service mysql start --wsrep-new-cluster"
+    - name: "service mysql start --wsrep_new_cluster"
     - require: 
       - pkg: mariadb-pkgs
       - service: mysql_stop
