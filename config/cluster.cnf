@@ -32,7 +32,7 @@ max_connections= {{ grains['num_cpus'] * 100 }}
 
 # Galera Provider Configuration 
 wsrep_provider=/usr/lib/galera/libgalera_smm.so
-{% if grains['mem_total'] <= 2000 %}
+{% if grains['mem_total'] <= 2048 %}
 wsrep_provider_options="gcache.size=200M" 
 {% else %}
 wsrep_provider_options="gcache.size=1G"
