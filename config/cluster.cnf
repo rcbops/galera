@@ -12,11 +12,10 @@
 #####InnoDB Settings######
 #Set to 70% of the total memory. Per documentation: http://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_buffer_pool_size
 innodb_buffer_pool_size= {{ (grains['mem_total'] * 0.70)|int }}M
-innodb_log_file_size=128M
 innodb_flush_log_at_trx_commit=1
 innodb_file_per_table=1
 innodb_autoinc_lock_mode=2
-innodb_flush_method=O_DIRECT
+
 
 
 performance_schema=0
