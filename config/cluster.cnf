@@ -3,44 +3,50 @@
 {%- for id, ips in hosts.iteritems() %} 
   {% do ipaddress.append(ips[0]) %} 
 {% endfor %} 
-
-{% set hosts = salt['mine.get']('roles:db_bootstrap', 'network.ip_addrs', 'grain') %}
-{%- for id, ips in hosts.iteritems() %} 
-  {% do ipaddress.append(ips[0]) %}
-{% endfor %}
-
+{% set bootstrap_ip = salt['mine.get']('roles:db_bootstrap', 'network.ip_addrs', 'grain').values()[0][0] %}
+{% do ipaddress.append(bootstrap_ip) %}
 {% set ipaddress = ",".join(ipaddress) %}
+
 [mysqld]
 
-#innodb_buffer_pool_size=200M
-#innodb_log_file_size=100M
-innodb_flush_log_at_trx_commit=0
-max_connections=1024
-innodb_file_per_table
-server_id={{ grains['server_id'] }}
+#####InnoDB Settings######
+#Set to 70% of the total memory. Per documentation: http://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_buffer_pool_size
+innodb_buffer_pool_size= {{ (grains['mem_total'] * 0.70)|int }}M
+innodb_flush_log_at_trx_commit=1
+innodb_file_per_table=1
+innodb_autoinc_lock_mode=2
+
+
 
 performance_schema=0
-
+server_id={{ grains['server_id'] }}
 binlog_format=ROW
 default-storage-engine=innodb
-innodb_autoinc_lock_mode=2
 query_cache_type=0
 query_cache_size=0
 bind-address=0.0.0.0
+#Max connections is set to 100 * The number of CPUS the VM has
+max_connections= {{ grains['num_cpus'] * 100 }}
 
 
 # Galera Provider Configuration 
 wsrep_provider=/usr/lib/galera/libgalera_smm.so
-#wsrep_provider_options="gchache.size=32G" 
+{% if grains['mem_total'] <= 2048 %}
+wsrep_provider_options="gcache.size=200M" 
+{% else %}
+wsrep_provider_options="gcache.size=1G"
+{% endif %}
 
 #Galera Cluster Configuration
 wsrep_cluster_name="RPC_MariaDB"
 wsrep_cluster_address="gcomm://{{ ipaddress }}"
 
 # Galera Synchronization Configuration 
-#Change sst method to xtrabackup.
-wsrep_sst_method=rsync
-#wsrep_sst_auth=user:pass
+wsrep_sst_method=xtrabackup
+wsrep_sst_auth=root:{{ pillar['mysql_config']['admin_password'] }}
+
+#The number of slave threads has been optimized to be the number of cpus.
+wsrep_slave_threads={{ grains['num_cpus'] }}
 
 # Galera Node Configuration
 wsrep_node_address="{{ salt['mine.get'](grains['id'], 'network.ip_addrs').values()[0][0] }}"
