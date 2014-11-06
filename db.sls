@@ -6,9 +6,7 @@
     - connection_user: root
     - connection_pass: {{ pillar['mysql_config']['admin_password'] }}
     - connection_charset: utf8
-    - require:
-      - pkg: python-mysqldb
-      - service: ensure_running
+
 
 database_from_heat:
   mysql_database.present:
@@ -18,7 +16,7 @@ database_from_heat:
     - connection_charset: utf8
     - require: 
       - mysql_user: {{ pillar['user_via_heat']['name'] }}
-      - service: ensure_running
+
 
 user_grants:
   mysql_grants.present:
@@ -32,4 +30,3 @@ user_grants:
     - require:
       - mysql_user: {{ pillar['user_via_heat']['name'] }}
       - mysql_database: database_from_heat
-      - service: ensure_running
