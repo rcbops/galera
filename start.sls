@@ -9,8 +9,4 @@ start_wsrep:
 mysql:
   service.running:
     - reload: True
-    - watch:
-      {% for cfgfile, info in pillar['mdb_cfg_files'].iteritems() %}
-      - file: {{ info['path'] }}
-      {% endfor %}
 {% endif %}
