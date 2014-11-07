@@ -150,8 +150,4 @@ debconf:
   pkg: 
     - installed
 
-mysql_stop: 
-  service: 
-    - name: mysql 
-    - dead
 
