@@ -1,4 +1,8 @@
-TO DO
+# A salt formula for creating a MariaDB 10.0/ Galera cluster
+
+This formula will: 
+*Set up haproxy for load balancing multiple MariaDB servers
+*Set up a cluster of 3 MariaDB nodes with Galera wsrep
 
 
 
@@ -44,8 +48,6 @@ mysql_config:
 	maintenance_password: $pw
 	admin_password: $admin_password
 ```
-
-
 
 ###Orchestration Runner
 ```yaml
@@ -108,4 +110,31 @@ build-db:
 		- require:
 			- salt: non-bootstrap-start
 
+```
+
+#### How to use
+This formula uses the orchestration runner above to orchestrate the deployment of the MariaDB/Galera cluster load balanced using haproxy. 
+
+Before running the orchestration runner, make sure the pillar above is in the /srv/pillar directory and the orchestration runner in the /srv/salt/orchestration directory. Also, assign minions their respective roles. 
+
+## Assigning roles: 
+Choose a minion to be the haproxy minion and assign it the haproxy role by setting it's grain: 
+```shell
+salt <node> grains.setval roles ['haproxy']
+```
+Choose a minion that will act as the clusters bootstrap node and assigne it the "db_bootstrap" role: 
+```shell
+salt <node> grains.setval roles ['db_bootstrap']
+```
+Assign the "db" role to the remaining nodes that will be a part of the cluster: 
+```shell
+salt <node> grains.setval roles ['db'] 
+```
+
+Note: Ensure the ID of the database nodes contain the string "db". This is because of the way the orchestration runner targets the nodes. 
+
+## Run orchestration 
+Finally, run the orchestration runner.
+```shell
+salt-run state.sls orchestration.galera_cluster
 ```
