@@ -1,8 +1,8 @@
 # A salt formula for creating a MariaDB 10.0/ Galera cluster
 
 This formula will: 
-*Set up haproxy for load balancing multiple MariaDB servers
-*Set up a cluster of 3 MariaDB nodes with Galera wsrep
+* Set up haproxy for load balancing multiple MariaDB servers
+* Set up a cluster of 3 MariaDB nodes with Galera wsrep
 
 
 
