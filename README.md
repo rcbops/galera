@@ -131,7 +131,7 @@ Assign the "db" role to the remaining nodes that will be a part of the cluster:
 salt <node> grains.setval roles ['db'] 
 ```
 
-Note: Ensure the ID of the database nodes contain the string "db". This is because of the way the orchestration runner targets the nodes. 
+Note: Ensure the ID of the database nodes contain the string "db". The bootstrap node ID must be db_bootstrap, and the other nodes must be "db2" and "db3". This is because of the way the orchestration runner targets the nodes. 
 
 #### Run orchestration: 
 Finally, run the orchestration runner.
