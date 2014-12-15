@@ -45,6 +45,12 @@ libmysqlclient18:
 python-mysqldb:
   pkg.installed
 
+socat:
+  pkg.installed
+
+netcat:
+  pkg.installed
+
 percona-repo:
   pkgrepo.managed:
   - name: deb http://repo.percona.com/apt precise  main
