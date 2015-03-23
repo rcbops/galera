@@ -34,6 +34,22 @@ apt_update_maria_repo:
       - pkgrepo: mariadb-repo
       - file: /etc/apt/preferences.d/MariaDB.pref
 
+python-software-properties: 
+  pkg: 
+    - installed
+
+rsync:
+  pkg:
+    - installed
+
+debconf-utils:
+  pkg:
+    - installed
+
+debconf:
+  pkg: 
+    - installed
+
 mysql-common:
   pkg:
     - installed
@@ -43,13 +59,16 @@ libmysqlclient18:
     - installed
 
 python-mysqldb:
-  pkg.installed
+  pkg:
+    - installed
 
 socat:
-  pkg.installed
+  pkg:
+    - installed
 
 netcat:
-  pkg.installed
+  pkg:
+    - installed
 
 percona-repo:
   pkgrepo.managed:
@@ -119,41 +138,30 @@ ensure_running:
     - require: 
       - pkg: mariadb-pkgs
 
-
 #Currently, Ubuntu and Debian's MariaDB servers use a special maintenance user to do routine maintenance. 
 #Some tasks that fall outside of the maintenance category also are run as this user, including important 
 #functions like stopping MySQL.
+mysql_update_maint_password:
+  mysql_user.present:
+    - name: debian-sys-maint
+    - host: localhost
+    - password: '{{ pillar['mysql_config']['maintenance_password'] }}'
+    - connection_user: root
+    - connection_pass: {{ pillar['mysql_config']['admin_password'] }}
+    - connection_charset: utf8
+    - require:
+      - pkg: mariadb-pkgs
+      - service: ensure_running
+
 mysql_update_maint:
-  cmd.run:
-    - name: mysql -u root -p{{ admin_password }} -e "GRANT ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'localhost' IDENTIFIED BY '{{ pillar['mysql_config']['maintenance_password'] }}';"
+  mysql_grants.present:
+    - grant: all privileges
+    - database: '*.*'
+    - user: debian-sys-maint
+    - host: localhost
+    - connection_user: root
+    - connection_pass: {{ pillar['mysql_config']['admin_password'] }}
+    - connection_charset: utf8
     - require:
       - pkg: mariadb-pkgs
       - service: ensure_running
-
-mysql_update_haproxy:
-  cmd.run:
-    - name: mysql -u root -p{{ admin_password }} mysql -e "INSERT INTO user (Host,User) values ('{{ haproxy_ip }}','haproxy');" || echo true
-    - require:
-      - pkg: mariadb-pkgs
-      - service: ensure_running
-
-
-## Move this to common salt state file? 
-python-software-properties: 
-  pkg: 
-    - installed
-
-## Move this to common salt state file? 
-rsync:
-  pkg:
-    - installed
-
-debconf-utils:
-  pkg:
-    - installed
-
-debconf:
-  pkg: 
-    - installed
-
-
