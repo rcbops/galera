@@ -34,19 +34,6 @@ user_grants:
       - mysql_user: {{ pillar['user_via_heat']['name'] }}
       - mysql_database: database_from_heat
 
-#Currently, Ubuntu and Debian's MariaDB servers use a special maintenance user to do routine maintenance. 
-#Some tasks that fall outside of the maintenance category also are run as this user, including important 
-#functions like stopping MySQL.
-mysql_update_maint:
-  mysql_grants.present:
-    - grant: all privileges
-    - database: '*.*'
-    - user: debian-sys-maint
-    - host: localhost
-    - connection_user: root
-    - connection_pass: {{ pillar['mysql_config']['admin_password'] }}
-    - connection_charset: utf8
-
 haproxy:
   mysql_user.present:
     - host: {{ haproxy_ip }}
